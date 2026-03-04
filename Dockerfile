@@ -24,7 +24,7 @@ RUN pipenv run build
 # Stage 2: Production - no git, no token; copy installed packages from build
 FROM python:3.12-slim
 
-LABEL org.opencontainers.image.source="{{org.git_host}}/{{org.git_org}}/{{info.slug}}_{{service.name}}_api"
+LABEL org.opencontainers.image.source="https://github.com/stage0-demos/queue_profile_api"
 
 WORKDIR /opt/api_server
 
@@ -38,6 +38,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV ENABLE_LOGIN=true
 
-EXPOSE {{repo.port}}
+EXPOSE 8288
 
-CMD exec python -m gunicorn --bind 0.0.0.0:{{repo.port}} src.server:app
+CMD exec python -m gunicorn --bind 0.0.0.0:8288 src.server:app

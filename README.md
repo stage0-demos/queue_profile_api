@@ -1,10 +1,8 @@
-# Template Flask MongoDB API
-
-This is a Flask + MongoDB API template that demonstrates the {{info.name}} architecture patterns with three domain types: Control (full CRUD), Create (create and read), and Consume (read-only). 
+# Sample API
 
 ## Prerequisites
-- {{info.name}} [Developers Edition]({{org.git_host.name}}/{{org.git_org.name}}/{{info.slug}}/blob/main/DeveloperEdition/README.md)
-- Developer [API Standard Prerequisites]({{org.git_host.name}}/{{org.git_org.name}}/{{info.slug}}/blob/main/DeveloperEdition/standards/api_standards.md)
+- Question Queue [Developers Edition](https://github.com/stage0-demos/queue/blob/main/CONTRIBUTING.md)
+- Developer [API Standard Prerequisites](https://github.com/stage0-demos/queue/blob/main/DeveloperEdition/standards/api_standards.md)
 
 ## Developer Commands
 
@@ -19,10 +17,10 @@ pipenv run db
 ## run unit tests 
 pipenv run test
 
-## run api server in dev mode - captures command line, serves API at localhost:8184
+## run api server in dev mode - captures command line, serves API at localhost:8288
 pipenv run dev
 
-## run E2E tests (assumes running API at localhost:8184)
+## run E2E tests (assumes running API at localhost:8288)
 pipenv run e2e
 
 ## run tests with coverage report
@@ -61,76 +59,17 @@ pipenv run lint
 
 ## API Endpoints
 
-List endpoints (`GET /api/control`, `GET /api/create`, `GET /api/consume`) use server-side infinite scroll via `api_utils.mongo_utils.execute_infinite_scroll_query`. They support `?name=`, `?after_id=`, `?limit=`, `?sort_by=`, and `?order=` and return `{ items, limit, has_more, next_cursor }`. Invalid params return `400 Bad Request`.
-
-### Control Domain (Full CRUD)
-- `POST /api/control` - Create a new control document
-- `GET /api/control` - List controls (infinite scroll; `?name=`, `?after_id=`, `?limit=`, `?sort_by=`, `?order=`)
-- `GET /api/control/{id}` - Get a specific control document
-- `PATCH /api/control/{id}` - Update a control document
-
-### Create Domain (Create + Read)
-- `POST /api/create` - Create a new create document
-- `GET /api/create` - List creates (infinite scroll; same query params)
-- `GET /api/create/{id}` - Get a specific create document
-
-### Consume Domain (Read-only)
-- `GET /api/consume` - List consumes (infinite scroll; same query params)
-- `GET /api/consume/{id}` - Get a specific consume document
-
-### Common Endpoints
-- `GET /docs` - API Explorer (OpenAPI/Swagger documentation)
-- `POST /dev-login` - Development JWT token issuance (only enabled with `ENABLE_LOGIN=true`)
-- `GET /api/config` - Configuration endpoint
-- `GET /metrics` - Prometheus metrics
-
-See the [project swagger](./docs/openapi.yaml) for detailed endpoint information.
+see the [Open API Specifications](./docs/openapi.yaml) for details on the API
 
 ### Simple Curl Commands:
 ```bash
 # Get a token
-export TOKEN=$(curl -s -X POST http://localhost:8184/dev-login \
+export TOKEN=$(curl -s -X POST http://localhost:8288/dev-login \
   -H "Content-Type: application/json" \
   -d '{"subject": "user-123", "roles": ["admin"]}' | jq -r '.access_token')
 
-# Control endpoints
-curl http://localhost:8184/api/control \
+# Get the API Configuration
+curl http://localhost:8288/api/config \
   -H "Authorization: Bearer $TOKEN"
 
-curl http://localhost:8184/api/control?name=test \
-  -H "Authorization: Bearer $TOKEN"
-
-curl -X POST http://localhost:8184/api/control \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"name":"my-control","description":"Test control","status":"active"}'
-
-curl -X PATCH http://localhost:8184/api/control/{id} \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"status":"archived"}'
-
-# Create endpoints
-curl -X POST http://localhost:8184/api/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"name":"my-create","status":"active"}'
-
-curl http://localhost:8184/api/create \
-  -H "Authorization: Bearer $TOKEN"
-
-# Consume endpoints
-curl http://localhost:8184/api/consume \
-  -H "Authorization: Bearer $TOKEN"
-
-curl http://localhost:8184/api/consume?name=test \
-  -H "Authorization: Bearer $TOKEN"
 ```
-
-## RBAC
-All services implement a placeholder RBAC pattern for future authorization implementation:
-- **Control Service**: Requires valid authentication token (RBAC placeholder for future implementation)
-- **Create Service**: Requires valid authentication token (RBAC placeholder for future implementation)
-- **Consume Service**: Requires valid authentication token (RBAC placeholder for future implementation)
-
-The RBAC pattern is implemented as `_check_permission()` methods that currently pass through, allowing easy future implementation of role-based access control.
