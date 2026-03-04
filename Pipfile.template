@@ -1,0 +1,40 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+pymongo = "*"
+pyjwt = "*"
+api-utils = {editable = false, git = "{{org.git_host}}/{{org.git_org}}/{{info.slug}}_api_utils.git", ref = "main"}
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+setuptools = "*"
+build = "*"
+twine = "*"
+requests = "*"
+
+[scripts]
+build = "python -m compileall -b -f -q src/"
+dev = "sh -c 'ENABLE_LOGIN=true JWT_SECRET=dev-test PYTHONPATH=. python src/server.py'"
+test = "sh -c 'PYTHONPATH=. pytest test/ -v -m \"not e2e\"'"
+e2e = "sh -c 'PYTHONPATH=. pytest test/ -m e2e -v'"
+coverage = "sh -c 'PYTHONPATH=. pytest test/ -v -m \"not e2e\" --cov=src --cov-report=term-missing --cov-report=html'"
+lint = "black --check src test"
+format = "black src test"
+container = "sh -c 'DOCKER_BUILDKIT=0 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t {{org.docker_host}}/{{org.docker_org}}/{{info.slug}}_{{service.name}}_api:latest .'"
+push = "sh -c 'docker push {{org.docker_host}}/{{org.docker_org}}/{{info.slug}}_{{service.name}}_api:latest'"
+build-publish = "sh -c 'pipenv install --dev && pipenv run container && pipenv run push'"
+build-package = "sh -c 'pipenv install --dev && pipenv run container'"
+publish-package = "sh -c 'pipenv run push'"
+delete-package = "sh -c 'gh api -X DELETE /orgs/{{org.git_org}}/packages/container/{{info.slug}}_{{service.name}}_api'"
+db = "sh -c '{{info.developer_cli}} down && {{info.developer_cli}} up mongodb'"
+api = "sh -c '{{info.developer_cli}} down && {{info.developer_cli}} up {{service.name}}_api'"
+service = "sh -c '{{info.developer_cli}} down && {{info.developer_cli}} up {{service.name}}'"
+
+[requires]
+python_version = "3.12"
